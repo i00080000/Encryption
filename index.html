@@ -9,7 +9,7 @@
     body {
       margin: 0;
       font-family: 'Segoe UI', sans-serif;
-      background: #0c0c0c;
+      background: transparent;
       color: white;
       display: flex;
       justify-content: center;
@@ -18,7 +18,7 @@
     }
     .login-container, .container {
       display: none;
-      background: rgba(255,255,255,0.05);
+      background: transparent;
       border: 1px solid gold;
       padding: 20px;
       border-radius: 10px;
@@ -102,7 +102,7 @@
 </div>
 
 <script>
-  // ثوابت اسم المستخدم وكلمة المرور
+  // اسم المستخدم وكلمة المرور ثابتين
   const currentUsername = "admin";
   const currentPassword = "00201198";
 
@@ -116,8 +116,6 @@
       alert("Invalid username or password.");
     }
   }
-
-  // تم حذف دوال تغيير اسم المستخدم وكلمة المرور
 
   function generateIv() {
     const key = document.getElementById("key").value;
