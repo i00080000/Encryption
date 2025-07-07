@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Password Encryptor Login</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: #0c0c0c;
+      color: white;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+    .login-container, .container {
+      display: none;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid gold;
+      padding: 20px;
+      border-radius: 10px;
+      width: 95%;
+      max-width: 500px;
+      box-sizing: border-box;
+    }
+    .login-container.active, .container.active {
+      display: block;
+    }
+    h1 {
+      text-align: center;
+      color: gold;
+      letter-spacing: 3px;
+    }
+    label {
+      font-weight: bold;
+      display: block;
+      margin-top: 10px;
+    }
+    input, textarea {
+      width: 100%;
+      padding: 10px;
+      margin-top: 5px;
+      background: #111;
+      border: 1px solid gold;
+      color: white;          /* ·Ê‰ «·Œÿ √»Ì÷ */
+      box-sizing: border-box;
+      font-weight: bold;     /* Œÿ ⁄—Ì÷ */
+      text-shadow: none;     /* ≈“«·… «· ÊÂÃ */
+    }
+    textarea { resize: none; height: 120px; }
+    button {
+      margin-top: 10px;
+      width: 100%;
+      padding: 10px;
+      background: #222;
+      color: white;
+      border: 1px solid gold;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    button:hover {
+      background: gold;
+      color: black;
+    }
+  </style>
+</head>
+<body>
+
+<div class="login-container active" id="loginScreen">
+  <h1>Login</h1>
+  <label for="username">Username</label>
+  <input type="password" id="username" placeholder="Enter your username" />
+  <label for="password">Password</label>
+  <input type="password" id="password" placeholder="Enter your password" />
+  <button onclick="login()">Login</button>
+  <button onclick="changePassword()">Change Password</button>
+  <button onclick="changeUsername()">Change Username</button>
+</div>
+
+<div class="container" id="mainApp">
+  <h1>E N C R Y P T I O N</h1>
+  <label for="key">Key (16 characters)</label>
+  <input id="key" maxlength="16" placeholder="Enter 16-char key" oninput="this.value=this.value.replace(/[^\x00-\x7F]/g,'')" />
+  <label for="iv">IV (32 characters)</label>
+  <input id="iv" maxlength="32" placeholder="Enter 32-char IV" />
+  <button onclick="generateIv()">Generate IV</button>
+  <label for="valueToEncrypt">Value to Encrypt</label>
+  <textarea id="valueToEncrypt" placeholder="Enter text to encrypt"></textarea>
+  <button onclick="copyValue()">Copy Value</button>
+  <button onclick="encryptPassword()">Encrypt</button>
+  <button onclick="decryptPassword()">Decrypt</button>
+  <button onclick="copyOutput()">Copy Output</button>
+  <button onclick="clearFields()">Clear Fields</button>
+  <button onclick="saveToFile()">Save Result</button>
+  <label for="outputField">Result</label>
+  <textarea id="outputField"></textarea>
+  <label for="generatedPassword">Password</label>
+  <input id="generatedPassword" readonly />
+  <button onclick="generateCustomPassword()">Generate Password</button>
+  <button onclick="copyPassword()">Copy Password</button>
+</div>
+
+<script>
+  let currentUsername = "Ahmed Osama";
+  let currentPassword = "admin123";
+
+  function login() {
+    const u = document.getElementById("username").value.trim();
+    const p = document.getElementById("password").value.trim();
+    if (u === currentUsername && p === currentPassword) {
+      document.getElementById("loginScreen").classList.remove("active");
+      document.getElementById("mainApp").classList.add("active");
+    } else {
+      alert("Invalid username or password.");
+    }
+  }
+
+  function changePassword() {
+    const user = prompt("Enter your username:");
+    if (user !== currentUsername) return alert("Wrong username.");
+    const newPassword = prompt("Enter new password:");
+    const confirm = prompt("Confirm new password:");
+    if (newPassword && newPassword === confirm) {
+      currentPassword = newPassword;
+      alert("Password changed successfully.");
+    } else {
+      alert("Passwords do not match.");
+    }
+  }
+
+  function changeUsername() {
+    const oldUser = prompt("Enter your current username:");
+    if (oldUser !== currentUsername) return alert("Wrong username.");
+    const newUser = prompt("Enter new username:");
+    const confirm = prompt("Confirm new username:");
+    if (newUser && newUser === confirm) {
+      currentUsername = newUser;
+      alert("Username changed successfully.");
+    } else {
+      alert("Usernames do not match.");
+    }
+  }
+
+  function generateIv() {
+    const key = document.getElementById("key").value;
+    if (key.length !== 16) return alert("Enter valid 16-character key first.");
+    const iv = CryptoJS.lib.WordArray.random(16).toString(CryptoJS.enc.Hex);
+    document.getElementById("iv").value = iv.substring(0, 32);
+  }
+
+  function encryptPassword() {
+    const key = document.getElementById("key").value;
+    const iv = document.getElementById("iv").value;
+    const value = document.getElementById("valueToEncrypt").value;
+    if (key.length !== 16 || iv.length !== 32 || !value) return alert("Fill key/iv/value properly.");
+    const encrypted = CryptoJS.AES.encrypt(
+      CryptoJS.enc.Utf8.parse(value),
+      CryptoJS.enc.Utf8.parse(key),
+      {
+        iv: CryptoJS.enc.Hex.parse(iv),
+        mode: CryptoJS.mode.CBC,
+        padding: CryptoJS.pad.Pkcs7
+      }
+    ).ciphertext.toString(CryptoJS.enc.Hex);
+    document.getElementById("outputField").value = encrypted;
+  }
+
+  function decryptPassword() {
+    const key = document.getElementById("key").value;
+    const iv = document.getElementById("iv").value;
+    const encryptedHex = document.getElementById("outputField").value;
+    if (key.length !== 16 || iv.length !== 32 || !encryptedHex) return alert("Fill all fields correctly.");
+    try {
+      const decrypted = CryptoJS.AES.decrypt(
+        { ciphertext: CryptoJS.enc.Hex.parse(encryptedHex) },
+        CryptoJS.enc.Utf8.parse(key),
+        {
+          iv: CryptoJS.enc.Hex.parse(iv),
+          mode: CryptoJS.mode.CBC,
+          padding: CryptoJS.pad.Pkcs7
+        }
+      ).toString(CryptoJS.enc.Utf8);
+      if (!decrypted) return alert("Decryption failed.");
+      document.getElementById("valueToEncrypt").value = decrypted;
+    } catch {
+      alert("Error decrypting data.");
+    }
+  }
+
+  function clearFields() {
+    document.getElementById("key").value = "";
+    document.getElementById("iv").value = "";
+    document.getElementById("valueToEncrypt").value = "";
+    document.getElementById("outputField").value = "";
+    document.getElementById("generatedPassword").value = "";
+  }
+
+  function copyOutput() {
+    const output = document.getElementById("outputField");
+    output.select();
+    document.execCommand("copy");
+    alert("Output copied.");
+  }
+
+  function copyValue() {
+    const val = document.getElementById("valueToEncrypt");
+    val.select();
+    document.execCommand("copy");
+    alert("Value copied.");
+  }
+
+  function saveToFile() {
+    const key = document.getElementById("key").value;
+    const iv = document.getElementById("iv").value;
+    const encrypted = document.getElementById("outputField").value;
+    const password = document.getElementById("generatedPassword").value;
+    if (!key || !iv || !encrypted || key.length !== 16 || iv.length !== 32) return alert("Fill all fields correctly.");
+    const content = `KEY:
+${key}
+
+IV:
+${iv}
+
+ENCRYPTED:
+${encrypted}${password ? `
+
+PASSWORD:
+${password}` : ''}`;
+    const blob = new Blob([content], { type: "text/plain" });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = "password_data.txt";
+    a.click();
+  }
+
+  function generateCustomPassword() {
+    const base = "A300988Salwa250125$";
+    let randomDigits = "";
+    for (let i = 0; i < 10; i++) randomDigits += Math.floor(Math.random() * 10);
+    document.getElementById("generatedPassword").value = base + randomDigits;
+  }
+
+  function copyPassword() {
+    const field = document.getElementById("generatedPassword");
+    field.select();
+    document.execCommand("copy");
+    alert("Password copied.");
+    field.value = "";
+  }
+</script>
+</body>
+</html>
