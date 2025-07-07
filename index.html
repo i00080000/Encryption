@@ -45,10 +45,10 @@
       margin-top: 5px;
       background: #111;
       border: 1px solid gold;
-      color: white;          /* ��� ���� ���� */
+      color: white;
       box-sizing: border-box;
-      font-weight: bold;     /* �� ���� */
-      text-shadow: none;     /* ����� ������ */
+      font-weight: bold;
+      text-shadow: none;
     }
     textarea { resize: none; height: 120px; }
     button {
@@ -76,8 +76,6 @@
   <label for="password">Password</label>
   <input type="password" id="password" placeholder="Enter your password" />
   <button onclick="login()">Login</button>
-  <button onclick="changePassword()">Change Password</button>
-  <button onclick="changeUsername()">Change Username</button>
 </div>
 
 <div class="container" id="mainApp">
@@ -104,8 +102,9 @@
 </div>
 
 <script>
-  let currentUsername = "Ahmed Osama";
-  let currentPassword = "admin123";
+  // ثوابت اسم المستخدم وكلمة المرور
+  const currentUsername = "admin";
+  const currentPassword = "00201198";
 
   function login() {
     const u = document.getElementById("username").value.trim();
@@ -118,31 +117,7 @@
     }
   }
 
-  function changePassword() {
-    const user = prompt("Enter your username:");
-    if (user !== currentUsername) return alert("Wrong username.");
-    const newPassword = prompt("Enter new password:");
-    const confirm = prompt("Confirm new password:");
-    if (newPassword && newPassword === confirm) {
-      currentPassword = newPassword;
-      alert("Password changed successfully.");
-    } else {
-      alert("Passwords do not match.");
-    }
-  }
-
-  function changeUsername() {
-    const oldUser = prompt("Enter your current username:");
-    if (oldUser !== currentUsername) return alert("Wrong username.");
-    const newUser = prompt("Enter new username:");
-    const confirm = prompt("Confirm new username:");
-    if (newUser && newUser === confirm) {
-      currentUsername = newUser;
-      alert("Username changed successfully.");
-    } else {
-      alert("Usernames do not match.");
-    }
-  }
+  // تم حذف دوال تغيير اسم المستخدم وكلمة المرور
 
   function generateIv() {
     const key = document.getElementById("key").value;
