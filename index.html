@@ -9,17 +9,18 @@
     body {
       margin: 0;
       font-family: 'Segoe UI', sans-serif;
-      background: transparent;
-      color: white;
+      background: white; /* تغيير الخلفية إلى الأبيض */
+      color: black; /* النص داخل الصفحة باللون الأسود */
       display: flex;
       justify-content: center;
       align-items: center;
       min-height: 100vh;
+      border: 5px solid black; /* حدود الصفحة باللون الأسود */
     }
     .login-container, .container {
       display: none;
       background: transparent;
-      border: 1px solid gold;
+      border: 1px solid black; /* حدود المربعات باللون الأسود */
       padding: 20px;
       border-radius: 10px;
       width: 95%;
@@ -31,7 +32,7 @@
     }
     h1 {
       text-align: center;
-      color: gold;
+      color: black; /* تغيير لون كلمة ENCRYPTION إلى الأسود */
       letter-spacing: 3px;
     }
     label {
@@ -43,14 +44,17 @@
       width: 100%;
       padding: 10px;
       margin-top: 5px;
-      background: #111;
+      background: #111; /* خلفية المربعات باللون الأسود */
       border: 1px solid gold;
-      color: white;
+      color: white; /* النص داخل المربعات باللون الأبيض */
       box-sizing: border-box;
       font-weight: bold;
       text-shadow: none;
     }
-    textarea { resize: none; height: 120px; }
+    textarea { 
+      resize: none; 
+      height: 120px; 
+    }
     button {
       margin-top: 10px;
       width: 100%;
