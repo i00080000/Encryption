@@ -54,7 +54,7 @@
       color: white;
       box-sizing: border-box;
       font-weight: bold;
-      height: 42px; /* ارتفاع ثابت لجميع الحقول */
+      height: 42px;
     }
 
     textarea {
@@ -189,8 +189,15 @@
   <input id="generatedPassword" readonly />
 
   <div class="password-buttons">
-    <button onclick="generateCustomPassword()">Generate</button>
-    <button onclick="copyPassword()">Copy</button>
+    <button onclick="generateCustomPassword()">Generate Password</button>
+    <button onclick="copyPassword()">Copy Password</button>
+  </div>
+
+  <!-- أزرار جديدة لتوليد أرقام -->
+  <div class="password-buttons" style="margin-top:5px;">
+    <button onclick="generateNumbers(8)">Generate 8 digits</button>
+    <button onclick="generateNumbers(6)">Generate 6 digits</button>
+    <button onclick="generateNumbers(4)">Generate 4 digits</button>
   </div>
 
 </div>
@@ -333,6 +340,7 @@ ${password ? `PASSWORD: ${password}` : ''}`;
     a.click();
   }
 
+  // توليد باسورد عشوائي قوي
   function generateCustomPassword() {
     const base = "Eso$880930250125$";
     let randomDigits = "";
@@ -348,6 +356,15 @@ ${password ? `PASSWORD: ${password}` : ''}`;
     document.execCommand("copy");
     alert("Password copied.");
     field.value = "";
+  }
+
+  // دالة جديدة لتوليد أرقام بأي طول
+  function generateNumbers(length) {
+    let numbers = "";
+    for (let i = 0; i < length; i++) {
+      numbers += Math.floor(Math.random() * 10);
+    }
+    document.getElementById("generatedPassword").value = numbers;
   }
 
 </script>
