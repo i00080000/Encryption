@@ -5,114 +5,205 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Password Encryptor Login</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+
   <style>
     body {
       margin: 0;
       font-family: 'Segoe UI', sans-serif;
-      background: white; /* تغيير الخلفية إلى الأبيض */
-      color: black; /* النص داخل الصفحة باللون الأسود */
+      background: white;
+      color: black;
       display: flex;
       justify-content: center;
       align-items: center;
       min-height: 100vh;
-      border: 5px solid black; /* حدود الصفحة باللون الأسود */
+      border: 5px solid black;
     }
+
     .login-container, .container {
       display: none;
       background: transparent;
-      border: 1px solid black; /* حدود المربعات باللون الأسود */
+      border: 1px solid black;
       padding: 20px;
       border-radius: 10px;
       width: 95%;
       max-width: 500px;
       box-sizing: border-box;
     }
+
     .login-container.active, .container.active {
       display: block;
     }
+
     h1 {
       text-align: center;
-      color: black; /* تغيير لون كلمة ENCRYPTION إلى الأسود */
+      color: black;
       letter-spacing: 3px;
     }
+
     label {
       font-weight: bold;
       display: block;
       margin-top: 10px;
     }
+
     input, textarea {
       width: 100%;
-      padding: 10px;
-      margin-top: 5px;
-      background: #111; /* خلفية المربعات باللون الأسود */
+      padding: 0 10px;
+      background: #111;
       border: 1px solid gold;
-      color: white; /* النص داخل المربعات باللون الأبيض */
+      color: white;
       box-sizing: border-box;
       font-weight: bold;
-      text-shadow: none;
+      height: 42px; /* ارتفاع ثابت لجميع الحقول */
     }
-    textarea { 
-      resize: none; 
-      height: 120px; 
-    }
-    button {
-      margin-top: 10px;
-      width: 100%;
+
+    textarea {
+      resize: none;
+      height: 120px;
       padding: 10px;
+    }
+
+    button {
+      padding: 0;
       background: #222;
       color: white;
       border: 1px solid gold;
       cursor: pointer;
       font-weight: bold;
+      height: 42px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      box-sizing: border-box;
     }
+
     button:hover {
       background: gold;
       color: black;
     }
+
+    .inline-box {
+      display: flex;
+      gap: 10px;
+      align-items: stretch;
+      margin-top: 5px;
+    }
+
+    .inline-box input {
+      flex: 1;
+      height: 42px;
+    }
+
+    .inline-box button {
+      flex: 0 0 100px;
+      height: 42px;
+    }
+
+    .actions-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 15px;
+    }
+
+    .full-width {
+      width: 100%;
+      margin-top: 10px;
+    }
+
+    .password-buttons {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 5px;
+      gap: 10px;
+    }
+
+    .password-buttons button {
+      flex: 1;
+      height: 42px;
+    }
+
   </style>
 </head>
+
 <body>
 
+<!-- LOGIN SCREEN -->
 <div class="login-container active" id="loginScreen">
   <h1>Login</h1>
+
   <label for="username">Username</label>
   <input type="password" id="username" placeholder="Enter your username" />
+
   <label for="password">Password</label>
   <input type="password" id="password" placeholder="Enter your password" />
-  <button onclick="login()">Login</button>
+
+  <button class="full-width" onclick="login()">Login</button>
 </div>
 
+<!-- MAIN APP -->
 <div class="container" id="mainApp">
   <h1>E N C R Y P T I O N</h1>
+
+  <!-- KEY -->
   <label for="key">Key (16 characters)</label>
-  <input id="key" maxlength="16" placeholder="Enter 16-char key" oninput="this.value=this.value.replace(/[^\x00-\x7F]/g,'')" />
+  <div class="inline-box">
+    <input id="key" maxlength="16" placeholder="Enter 16-char key"
+           oninput="this.value=this.value.replace(/[^\x00-\x7F]/g,'')" />
+    <button onclick="generateKey()">Generate</button>
+  </div>
+
+  <!-- IV -->
   <label for="iv">IV (32 characters)</label>
-  <input id="iv" maxlength="32" placeholder="Enter 32-char IV" />
-  <button onclick="generateIv()">Generate IV</button>
+  <div class="inline-box">
+    <input id="iv" maxlength="32" placeholder="Enter 32-char IV" />
+    <button onclick="generateIv()">Generate</button>
+  </div>
+
+  <!-- VALUE -->
   <label for="valueToEncrypt">Value to Encrypt</label>
   <textarea id="valueToEncrypt" placeholder="Enter text to encrypt"></textarea>
-  <button onclick="copyValue()">Copy Value</button>
-  <button onclick="encryptPassword()">Encrypt</button>
-  <button onclick="decryptPassword()">Decrypt</button>
-  <button onclick="copyOutput()">Copy Output</button>
-  <button onclick="clearFields()">Clear Fields</button>
-  <button onclick="saveToFile()">Save Result</button>
+  <button class="full-width" onclick="copyValue()">Copy Value</button>
+
+  <!-- COPY BUTTONS IN GRID -->
+  <div class="actions-grid">
+    <button onclick="copyKeyField()">Copy Key</button>
+    <button onclick="copyIvField()">Copy IV</button>
+
+    <button onclick="encryptPassword()">Encrypt</button>
+    <button onclick="decryptPassword()">Decrypt</button>
+
+    <button onclick="copyOutput()">Copy Output</button>
+    <button onclick="clearFields()">Clear Fields</button>
+  </div>
+
+  <!-- SAVE RESULT FULL WIDTH -->
+  <button class="full-width" onclick="saveToFile()">Save Result</button>
+
+  <!-- OUTPUT -->
   <label for="outputField">Result</label>
   <textarea id="outputField"></textarea>
+
+  <!-- PASSWORD GENERATOR -->
   <label for="generatedPassword">Password</label>
   <input id="generatedPassword" readonly />
-  <button onclick="generateCustomPassword()">Generate Password</button>
-  <button onclick="copyPassword()">Copy Password</button>
+
+  <div class="password-buttons">
+    <button onclick="generateCustomPassword()">Generate</button>
+    <button onclick="copyPassword()">Copy</button>
+  </div>
+
 </div>
 
 <script>
-  // اسم المستخدم وكلمة المرور ثابتين
+
   const currentUsername = "admin";
   const currentPassword = "00201198";
 
   function login() {
     const u = document.getElementById("username").value.trim();
     const p = document.getElementById("password").value.trim();
+
     if (u === currentUsername && p === currentPassword) {
       document.getElementById("loginScreen").classList.remove("active");
       document.getElementById("mainApp").classList.add("active");
@@ -121,9 +212,16 @@
     }
   }
 
+  function generateKey() {
+    const key = CryptoJS.lib.WordArray.random(8).toString(CryptoJS.enc.Hex);
+    document.getElementById("key").value = key.substring(0, 16);
+  }
+
   function generateIv() {
     const key = document.getElementById("key").value;
-    if (key.length !== 16) return alert("Enter valid 16-character key first.");
+    if (key.length !== 16)
+      return alert("Enter valid 16-character key first.");
+
     const iv = CryptoJS.lib.WordArray.random(16).toString(CryptoJS.enc.Hex);
     document.getElementById("iv").value = iv.substring(0, 32);
   }
@@ -132,7 +230,10 @@
     const key = document.getElementById("key").value;
     const iv = document.getElementById("iv").value;
     const value = document.getElementById("valueToEncrypt").value;
-    if (key.length !== 16 || iv.length !== 32 || !value) return alert("Fill key/iv/value properly.");
+
+    if (key.length !== 16 || iv.length !== 32 || !value)
+      return alert("Fill key/iv/value properly.");
+
     const encrypted = CryptoJS.AES.encrypt(
       CryptoJS.enc.Utf8.parse(value),
       CryptoJS.enc.Utf8.parse(key),
@@ -142,6 +243,7 @@
         padding: CryptoJS.pad.Pkcs7
       }
     ).ciphertext.toString(CryptoJS.enc.Hex);
+
     document.getElementById("outputField").value = encrypted;
   }
 
@@ -149,7 +251,10 @@
     const key = document.getElementById("key").value;
     const iv = document.getElementById("iv").value;
     const encryptedHex = document.getElementById("outputField").value;
-    if (key.length !== 16 || iv.length !== 32 || !encryptedHex) return alert("Fill all fields correctly.");
+
+    if (key.length !== 16 || iv.length !== 32 || !encryptedHex)
+      return alert("Fill all fields correctly.");
+
     try {
       const decrypted = CryptoJS.AES.decrypt(
         { ciphertext: CryptoJS.enc.Hex.parse(encryptedHex) },
@@ -160,11 +265,42 @@
           padding: CryptoJS.pad.Pkcs7
         }
       ).toString(CryptoJS.enc.Utf8);
+
       if (!decrypted) return alert("Decryption failed.");
+
       document.getElementById("valueToEncrypt").value = decrypted;
+
     } catch {
       alert("Error decrypting data.");
     }
+  }
+
+  function copyValue() {
+    const val = document.getElementById("valueToEncrypt");
+    val.select();
+    document.execCommand("copy");
+    alert("Value copied.");
+  }
+
+  function copyKeyField() {
+    const keyField = document.getElementById("key");
+    keyField.select();
+    document.execCommand("copy");
+    alert("Key copied.");
+  }
+
+  function copyIvField() {
+    const ivField = document.getElementById("iv");
+    ivField.select();
+    document.execCommand("copy");
+    alert("IV copied.");
+  }
+
+  function copyOutput() {
+    const output = document.getElementById("outputField");
+    output.select();
+    document.execCommand("copy");
+    alert("Output copied.");
   }
 
   function clearFields() {
@@ -175,37 +311,21 @@
     document.getElementById("generatedPassword").value = "";
   }
 
-  function copyOutput() {
-    const output = document.getElementById("outputField");
-    output.select();
-    document.execCommand("copy");
-    alert("Output copied.");
-  }
-
-  function copyValue() {
-    const val = document.getElementById("valueToEncrypt");
-    val.select();
-    document.execCommand("copy");
-    alert("Value copied.");
-  }
-
   function saveToFile() {
     const key = document.getElementById("key").value;
     const iv = document.getElementById("iv").value;
     const encrypted = document.getElementById("outputField").value;
     const password = document.getElementById("generatedPassword").value;
-    if (!key || !iv || !encrypted || key.length !== 16 || iv.length !== 32) return alert("Fill all fields correctly.");
-    const content = `KEY:
-${key}
 
-IV:
-${iv}
+    if (!key || !iv || !encrypted || key.length !== 16 || iv.length !== 32)
+      return alert("Fill all fields correctly.");
 
-ENCRYPTED:
-${encrypted}${password ? `
+    const content =
+`KEY: ${key}
+IV: ${iv}
+ENCRYPTED: ${encrypted}
+${password ? `PASSWORD: ${password}` : ''}`;
 
-PASSWORD:
-${password}` : ''}`;
     const blob = new Blob([content], { type: "text/plain" });
     const a = document.createElement("a");
     a.href = URL.createObjectURL(blob);
@@ -216,7 +336,9 @@ ${password}` : ''}`;
   function generateCustomPassword() {
     const base = "A300988Salwa250125$";
     let randomDigits = "";
-    for (let i = 0; i < 10; i++) randomDigits += Math.floor(Math.random() * 10);
+    for (let i = 0; i < 10; i++)
+      randomDigits += Math.floor(Math.random() * 10);
+
     document.getElementById("generatedPassword").value = base + randomDigits;
   }
 
@@ -227,6 +349,8 @@ ${password}` : ''}`;
     alert("Password copied.");
     field.value = "";
   }
+
 </script>
+
 </body>
 </html>
