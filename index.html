@@ -165,7 +165,7 @@
   <textarea id="valueToEncrypt" placeholder="Enter text to encrypt"></textarea>
   <button class="full-width" onclick="copyValue()">Copy Value</button>
 
-  <!-- COPY BUTTONS IN GRID -->
+  <!-- BUTTONS -->
   <div class="actions-grid">
     <button onclick="copyKeyField()">Copy Key</button>
     <button onclick="copyIvField()">Copy IV</button>
@@ -177,14 +177,13 @@
     <button onclick="clearFields()">Clear Fields</button>
   </div>
 
-  <!-- SAVE RESULT FULL WIDTH -->
   <button class="full-width" onclick="saveToFile()">Save Result</button>
 
   <!-- OUTPUT -->
   <label for="outputField">Result</label>
   <textarea id="outputField"></textarea>
 
-  <!-- PASSWORD GENERATOR -->
+  <!-- PASSWORD OUTPUT -->
   <label for="generatedPassword">Password</label>
   <input id="generatedPassword" readonly />
 
@@ -193,11 +192,9 @@
     <button onclick="copyPassword()">Copy Password</button>
   </div>
 
-  <!-- أزرار جديدة لتوليد أرقام -->
+  <!-- MIX BUTTON (ONLY 8) -->
   <div class="password-buttons" style="margin-top:5px;">
-    <button onclick="generateNumbers(8)">Generate 8 digits</button>
-    <button onclick="generateNumbers(6)">Generate 6 digits</button>
-    <button onclick="generateNumbers(4)">Generate 4 digits</button>
+    <button onclick="generateMixed()">Generate Mix 8</button>
   </div>
 
 </div>
@@ -340,7 +337,7 @@ ${password ? `PASSWORD: ${password}` : ''}`;
     a.click();
   }
 
-  // توليد باسورد عشوائي قوي
+  // باسورد جاهز
   function generateCustomPassword() {
     const base = "Eso$880930250125$";
     let randomDigits = "";
@@ -358,13 +355,31 @@ ${password ? `PASSWORD: ${password}` : ''}`;
     field.value = "";
   }
 
-  // دالة جديدة لتوليد أرقام بأي طول
-  function generateNumbers(length) {
-    let numbers = "";
-    for (let i = 0; i < length; i++) {
-      numbers += Math.floor(Math.random() * 10);
+  // ✔ MIX 8 = 3 CAPITAL + 4 small + 1 symbol
+  function generateMixed() {
+    const capitals = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    const small = "abcdefghijklmnopqrstuvwxyz";
+    const symbols = "@#$%!";
+
+    let result = "";
+
+    // 3 حروف كبيرة
+    for (let i = 0; i < 3; i++) {
+      result += capitals[Math.floor(Math.random() * capitals.length)];
     }
-    document.getElementById("generatedPassword").value = numbers;
+
+    // 4 حروف صغيرة
+    for (let i = 0; i < 4; i++) {
+      result += small[Math.floor(Math.random() * small.length)];
+    }
+
+    // 1 رمز
+    result += symbols[Math.floor(Math.random() * symbols.length)];
+
+    // عشوائية الترتيب
+    result = result.split("").sort(() => Math.random() - 0.5).join("");
+
+    document.getElementById("generatedPassword").value = result;
   }
 
 </script>
