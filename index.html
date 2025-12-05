@@ -192,9 +192,9 @@
     <button onclick="copyPassword()">Copy Password</button>
   </div>
 
-  <!-- MIX BUTTON (ONLY 8) -->
+  <!-- MIX 10 -->
   <div class="password-buttons" style="margin-top:5px;">
-    <button onclick="generateMixed()">Generate Mix 8</button>
+    <button onclick="generateMixed()">Generate Mix 10</button>
   </div>
 
 </div>
@@ -337,7 +337,6 @@ ${password ? `PASSWORD: ${password}` : ''}`;
     a.click();
   }
 
-  // باسورد جاهز
   function generateCustomPassword() {
     const base = "Eso$880930250125$";
     let randomDigits = "";
@@ -355,29 +354,34 @@ ${password ? `PASSWORD: ${password}` : ''}`;
     field.value = "";
   }
 
-  // ✔ MIX 8 = 3 CAPITAL + 4 small + 1 symbol
+  /*  🔥 MIX 10 — MUST CONTAIN: 
+      - CAPITAL
+      - small
+      - number
+      - symbol from %$#@
+  */
   function generateMixed() {
     const capitals = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
     const small = "abcdefghijklmnopqrstuvwxyz";
-    const symbols = "@#$%!";
+    const numbers = "0123456789";
+    const symbols = "%$#@";
 
-    let result = "";
+    let mandatory = "";
 
-    // 3 حروف كبيرة
-    for (let i = 0; i < 3; i++) {
-      result += capitals[Math.floor(Math.random() * capitals.length)];
+    // 1 من كل نوع
+    mandatory += capitals[Math.floor(Math.random() * capitals.length)];
+    mandatory += small[Math.floor(Math.random() * small.length)];
+    mandatory += numbers[Math.floor(Math.random() * numbers.length)];
+    mandatory += symbols[Math.floor(Math.random() * symbols.length)];
+
+    // باقي العدد = 10 - 4 = 6
+    const all = capitals + small + numbers + symbols;
+    for (let i = 0; i < 6; i++) {
+      mandatory += all[Math.floor(Math.random() * all.length)];
     }
 
-    // 4 حروف صغيرة
-    for (let i = 0; i < 4; i++) {
-      result += small[Math.floor(Math.random() * small.length)];
-    }
-
-    // 1 رمز
-    result += symbols[Math.floor(Math.random() * symbols.length)];
-
-    // عشوائية الترتيب
-    result = result.split("").sort(() => Math.random() - 0.5).join("");
+    // خلط عشوائي
+    const result = mandatory.split("").sort(() => Math.random() - 0.5).join("");
 
     document.getElementById("generatedPassword").value = result;
   }
