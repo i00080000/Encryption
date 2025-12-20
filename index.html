@@ -122,7 +122,6 @@
       flex: 1;
       height: 42px;
     }
-
   </style>
 </head>
 
@@ -132,11 +131,11 @@
 <div class="login-container active" id="loginScreen">
   <h1>Login</h1>
 
-  <label for="username">Username</label>
-  <input type="password" id="username" placeholder="Enter your username" />
+  <label>Username</label>
+  <input type="password" id="username" />
 
-  <label for="password">Password</label>
-  <input type="password" id="password" placeholder="Enter your password" />
+  <label>Password</label>
+  <input type="password" id="password" />
 
   <button class="full-width" onclick="login()">Login</button>
 </div>
@@ -145,46 +144,37 @@
 <div class="container" id="mainApp">
   <h1>E N C R Y P T I O N</h1>
 
-  <!-- KEY -->
-  <label for="key">Key (16 characters)</label>
+  <label>Key (16 characters)</label>
   <div class="inline-box">
-    <input id="key" maxlength="16" placeholder="Enter 16-char key"
-           oninput="this.value=this.value.replace(/[^\x00-\x7F]/g,'')" />
+    <input id="key" maxlength="16">
     <button onclick="generateKey()">Generate</button>
   </div>
 
-  <!-- IV -->
-  <label for="iv">IV (32 characters)</label>
+  <label>IV (32 characters)</label>
   <div class="inline-box">
-    <input id="iv" maxlength="32" placeholder="Enter 32-char IV" />
+    <input id="iv" maxlength="32">
     <button onclick="generateIv()">Generate</button>
   </div>
 
-  <!-- VALUE -->
-  <label for="valueToEncrypt">Value to Encrypt</label>
-  <textarea id="valueToEncrypt" placeholder="Enter text to encrypt"></textarea>
+  <label>Value to Encrypt</label>
+  <textarea id="valueToEncrypt"></textarea>
   <button class="full-width" onclick="copyValue()">Copy Value</button>
 
-  <!-- BUTTONS -->
   <div class="actions-grid">
     <button onclick="copyKeyField()">Copy Key</button>
     <button onclick="copyIvField()">Copy IV</button>
-
     <button onclick="encryptPassword()">Encrypt</button>
     <button onclick="decryptPassword()">Decrypt</button>
-
     <button onclick="copyOutput()">Copy Output</button>
     <button onclick="clearFields()">Clear Fields</button>
   </div>
 
   <button class="full-width" onclick="saveToFile()">Save Result</button>
 
-  <!-- OUTPUT -->
-  <label for="outputField">Result</label>
+  <label>Result</label>
   <textarea id="outputField"></textarea>
 
-  <!-- PASSWORD OUTPUT -->
-  <label for="generatedPassword">Password</label>
+  <label>Password</label>
   <input id="generatedPassword" readonly />
 
   <div class="password-buttons">
@@ -192,200 +182,146 @@
     <button onclick="copyPassword()">Copy Password</button>
   </div>
 
-  <!-- MIX 10 -->
   <div class="password-buttons" style="margin-top:5px;">
     <button onclick="generateMixed()">Generate Mix 10</button>
   </div>
-
 </div>
 
 <script>
+const currentUsername = "admin";
+const currentPassword = "00201198";
 
-  const currentUsername = "admin";
-  const currentPassword = "00201198";
+function login() {
+  if (username.value === currentUsername && password.value === currentPassword) {
+    loginScreen.classList.remove("active");
+    mainApp.classList.add("active");
+  } else {
+    alert("Invalid username or password.");
+  }
+}
 
-  function login() {
-    const u = document.getElementById("username").value.trim();
-    const p = document.getElementById("password").value.trim();
+function generateKey() {
+  key.value = CryptoJS.lib.WordArray.random(8)
+    .toString(CryptoJS.enc.Hex)
+    .substring(0, 16);
+}
 
-    if (u === currentUsername && p === currentPassword) {
-      document.getElementById("loginScreen").classList.remove("active");
-      document.getElementById("mainApp").classList.add("active");
-    } else {
-      alert("Invalid username or password.");
+function generateIv() {
+  iv.value = CryptoJS.lib.WordArray.random(16)
+    .toString(CryptoJS.enc.Hex)
+    .substring(0, 32);
+}
+
+function encryptPassword() {
+  const encrypted = CryptoJS.AES.encrypt(
+    CryptoJS.enc.Utf8.parse(valueToEncrypt.value),
+    CryptoJS.enc.Utf8.parse(key.value),
+    {
+      iv: CryptoJS.enc.Hex.parse(iv.value),
+      mode: CryptoJS.mode.CBC,
+      padding: CryptoJS.pad.Pkcs7
     }
-  }
+  ).ciphertext.toString(CryptoJS.enc.Hex);
 
-  function generateKey() {
-    const key = CryptoJS.lib.WordArray.random(8).toString(CryptoJS.enc.Hex);
-    document.getElementById("key").value = key.substring(0, 16);
-  }
+  outputField.value = encrypted;
+}
 
-  function generateIv() {
-    const key = document.getElementById("key").value;
-    if (key.length !== 16)
-      return alert("Enter valid 16-character key first.");
-
-    const iv = CryptoJS.lib.WordArray.random(16).toString(CryptoJS.enc.Hex);
-    document.getElementById("iv").value = iv.substring(0, 32);
-  }
-
-  function encryptPassword() {
-    const key = document.getElementById("key").value;
-    const iv = document.getElementById("iv").value;
-    const value = document.getElementById("valueToEncrypt").value;
-
-    if (key.length !== 16 || iv.length !== 32 || !value)
-      return alert("Fill key/iv/value properly.");
-
-    const encrypted = CryptoJS.AES.encrypt(
-      CryptoJS.enc.Utf8.parse(value),
-      CryptoJS.enc.Utf8.parse(key),
-      {
-        iv: CryptoJS.enc.Hex.parse(iv),
-        mode: CryptoJS.mode.CBC,
-        padding: CryptoJS.pad.Pkcs7
-      }
-    ).ciphertext.toString(CryptoJS.enc.Hex);
-
-    document.getElementById("outputField").value = encrypted;
-  }
-
-  function decryptPassword() {
-    const key = document.getElementById("key").value;
-    const iv = document.getElementById("iv").value;
-    const encryptedHex = document.getElementById("outputField").value;
-
-    if (key.length !== 16 || iv.length !== 32 || !encryptedHex)
-      return alert("Fill all fields correctly.");
-
-    try {
-      const decrypted = CryptoJS.AES.decrypt(
-        { ciphertext: CryptoJS.enc.Hex.parse(encryptedHex) },
-        CryptoJS.enc.Utf8.parse(key),
-        {
-          iv: CryptoJS.enc.Hex.parse(iv),
-          mode: CryptoJS.mode.CBC,
-          padding: CryptoJS.pad.Pkcs7
-        }
-      ).toString(CryptoJS.enc.Utf8);
-
-      if (!decrypted) return alert("Decryption failed.");
-
-      document.getElementById("valueToEncrypt").value = decrypted;
-
-    } catch {
-      alert("Error decrypting data.");
+function decryptPassword() {
+  const decrypted = CryptoJS.AES.decrypt(
+    { ciphertext: CryptoJS.enc.Hex.parse(outputField.value) },
+    CryptoJS.enc.Utf8.parse(key.value),
+    {
+      iv: CryptoJS.enc.Hex.parse(iv.value),
+      mode: CryptoJS.mode.CBC,
+      padding: CryptoJS.pad.Pkcs7
     }
+  ).toString(CryptoJS.enc.Utf8);
+
+  valueToEncrypt.value = decrypted;
+}
+
+function copyValue() {
+  valueToEncrypt.select();
+  document.execCommand("copy");
+}
+
+function copyKeyField() {
+  key.select();
+  document.execCommand("copy");
+}
+
+function copyIvField() {
+  iv.select();
+  document.execCommand("copy");
+}
+
+function copyOutput() {
+  outputField.select();
+  document.execCommand("copy");
+}
+
+function clearFields() {
+  key.value = iv.value = valueToEncrypt.value = outputField.value = generatedPassword.value = "";
+}
+
+function saveToFile() {
+  const content =
+`KEY: ${key.value}
+IV: ${iv.value}
+ENCRYPTED: ${outputField.value}
+PASSWORD: ${generatedPassword.value}`;
+
+  const blob = new Blob([content], { type: "text/plain" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "password_data.txt";
+  a.click();
+}
+
+/* ✅ التعديل هنا فقط */
+function generateCustomPassword() {
+  const numbers = "0123456789";
+  const fixedPrefix = "Osama";
+
+  let part1 = "";
+  for (let i = 0; i < 13; i++) {
+    part1 += numbers[Math.floor(Math.random() * numbers.length)];
   }
 
-  function copyValue() {
-    const val = document.getElementById("valueToEncrypt");
-    val.select();
-    document.execCommand("copy");
-    alert("Value copied.");
+  let part2 = "";
+  for (let i = 0; i < 10; i++) {
+    part2 += numbers[Math.floor(Math.random() * numbers.length)];
   }
 
-  function copyKeyField() {
-    const keyField = document.getElementById("key");
-    keyField.select();
-    document.execCommand("copy");
-    alert("Key copied.");
+  generatedPassword.value = `${fixedPrefix}$${part1}$${part2}`;
+}
+
+function copyPassword() {
+  generatedPassword.select();
+  document.execCommand("copy");
+  generatedPassword.value = "";
+}
+
+function generateMixed() {
+  const c = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+  const s = "abcdefghijklmnopqrstuvwxyz";
+  const n = "0123456789";
+  const sym = "%$#@";
+
+  let pass =
+    c[Math.floor(Math.random()*c.length)] +
+    s[Math.floor(Math.random()*s.length)] +
+    n[Math.floor(Math.random()*n.length)] +
+    sym[Math.floor(Math.random()*sym.length)];
+
+  const all = c + s + n + sym;
+  for (let i = 0; i < 6; i++) {
+    pass += all[Math.floor(Math.random()*all.length)];
   }
 
-  function copyIvField() {
-    const ivField = document.getElementById("iv");
-    ivField.select();
-    document.execCommand("copy");
-    alert("IV copied.");
-  }
-
-  function copyOutput() {
-    const output = document.getElementById("outputField");
-    output.select();
-    document.execCommand("copy");
-    alert("Output copied.");
-  }
-
-  function clearFields() {
-    document.getElementById("key").value = "";
-    document.getElementById("iv").value = "";
-    document.getElementById("valueToEncrypt").value = "";
-    document.getElementById("outputField").value = "";
-    document.getElementById("generatedPassword").value = "";
-  }
-
-  function saveToFile() {
-    const key = document.getElementById("key").value;
-    const iv = document.getElementById("iv").value;
-    const encrypted = document.getElementById("outputField").value;
-    const password = document.getElementById("generatedPassword").value;
-
-    if (!key || !iv || !encrypted || key.length !== 16 || iv.length !== 32)
-      return alert("Fill all fields correctly.");
-
-    const content =
-`KEY: ${key}
-IV: ${iv}
-ENCRYPTED: ${encrypted}
-${password ? `PASSWORD: ${password}` : ''}`;
-
-    const blob = new Blob([content], { type: "text/plain" });
-    const a = document.createElement("a");
-    a.href = URL.createObjectURL(blob);
-    a.download = "password_data.txt";
-    a.click();
-  }
-
-  function generateCustomPassword() {
-    const base = "Eso$880930250125$";
-    let randomDigits = "";
-    for (let i = 0; i < 10; i++)
-      randomDigits += Math.floor(Math.random() * 10);
-
-    document.getElementById("generatedPassword").value = base + randomDigits;
-  }
-
-  function copyPassword() {
-    const field = document.getElementById("generatedPassword");
-    field.select();
-    document.execCommand("copy");
-    alert("Password copied.");
-    field.value = "";
-  }
-
-  /*  🔥 MIX 10 — MUST CONTAIN: 
-      - CAPITAL
-      - small
-      - number
-      - symbol from %$#@
-  */
-  function generateMixed() {
-    const capitals = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-    const small = "abcdefghijklmnopqrstuvwxyz";
-    const numbers = "0123456789";
-    const symbols = "%$#@";
-
-    let mandatory = "";
-
-    // 1 من كل نوع
-    mandatory += capitals[Math.floor(Math.random() * capitals.length)];
-    mandatory += small[Math.floor(Math.random() * small.length)];
-    mandatory += numbers[Math.floor(Math.random() * numbers.length)];
-    mandatory += symbols[Math.floor(Math.random() * symbols.length)];
-
-    // باقي العدد = 10 - 4 = 6
-    const all = capitals + small + numbers + symbols;
-    for (let i = 0; i < 6; i++) {
-      mandatory += all[Math.floor(Math.random() * all.length)];
-    }
-
-    // خلط عشوائي
-    const result = mandatory.split("").sort(() => Math.random() - 0.5).join("");
-
-    document.getElementById("generatedPassword").value = result;
-  }
-
+  generatedPassword.value =
+    pass.split("").sort(() => Math.random() - 0.5).join("");
+}
 </script>
 
 </body>
